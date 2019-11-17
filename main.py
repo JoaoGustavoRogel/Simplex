@@ -48,22 +48,101 @@ def linha_pivo(quadro, col_pivo):
     
     return res
 
-"""quadro = np.matrix([
-    ['vb', 'g', 'm', 'a', 'b', 'c', 'ld'], 
-    ['z', -5, -7, 0, 0, 0, 0],
-    ['a', 3, 0, 1, 0, 0, 250],
-    ['b', 0, 1.5, 0, 1, 0, 100],
-    ['c', 0.25, 0.5, 0, 0, 1, 50]
-    ])
-"""
+print("Digite a função objetivo (forma padrão), siga o exemplo: Z +5A -7B +C = 0")
+func_objetivo = input()
 
-quadro = np.matrix ([
-    ['VB', 'A', 'B', 'C', 'X1', 'X2', 'LD'],
-    ['Z', -5, -7, -8, 0, 0, 0],
-    ['X1', 1, 1, 2, 1, 0, 1190],
-    ['X2', 3, 4.5, 1, 0, 1, 4000]
-])
+print("Digite a quantidade de restrições: ")
+qtd_rest = int(input())
+print("\nExemplo de restrição +A -3B +0C +X1 +0X2 = 0")
+print("Obs.: Todas equações devem ter a mesma quantidade de variáveis, as variáveis devem aparecer na mesma ordem")
+restricoes = []
+for i in range(qtd_rest):
+    print("Digite a " + str(i+1) + "º restrição: ")
+    aux = input()
+    restricoes.append(aux.split(' '))
 
+print("\nDigite a quantidade de variáveis bases: ")
+qtd_vb = int(input())
+var_base = []
+for i in range(qtd_vb):
+    print("Digite a " + str(i+1) + "º variável base: ")
+    aux = input()
+    var_base.append(aux)
+
+primeira_linha = []
+primeira_linha.append("VB")
+for i in func_objetivo.split(' '):
+    if i == 'Z':
+        continue
+    elif i == '=':
+        break
+    else:    
+        if len(i) == 3:
+            primeira_linha.append(i[2])
+        else:
+            primeira_linha.append(i[1])
+
+for i in var_base:
+    if i == 'Z':
+        continue
+    primeira_linha.append(i)
+primeira_linha.append("LD")
+
+aux = []
+for i in func_objetivo.split(' '):
+    if i == 'Z':
+        aux.append('Z')
+        continue
+    elif i == '=':
+        break
+    else:
+        num = i[0]
+        cont = 1
+        while((i[cont] >= '0' and i[cont] <= '9') or i[cont] == '.'):
+            num += i[cont]
+            cont += 1
+        aux.append(num)
+for i in var_base:
+    if i == 'Z':
+        continue
+    aux.append(0)
+aux.append(func_objetivo[-1])
+
+aux_quadro = []
+aux_quadro.append(primeira_linha)
+aux_quadro.append(aux)
+
+cont = 1
+for i in restricoes:
+    linha = []
+    linha.append(var_base[cont])
+    flag = False
+    for j in i:
+        if flag:
+            linha.append(j)
+            break
+        if j == '=':
+            flag = True
+            continue
+        else:
+            if len(j) == 2:
+                linha.append('1')
+            else:
+                count = 1
+                num = ""
+                if j[0] == '-':
+                    num += '-'
+                while((j[count] >= '0' and j[count] <= '9') or j[count] == '.'):
+                    num += j[count]
+                    count += 1
+                if num == "":
+                    num = "1"
+
+                linha.append(num)    
+    cont += 1
+    aux_quadro.append(linha)
+
+quadro = np.matrix(aux_quadro)
 print(quadro, '\n')
 
 while(not verifica_solucao_otima(quadro)):
